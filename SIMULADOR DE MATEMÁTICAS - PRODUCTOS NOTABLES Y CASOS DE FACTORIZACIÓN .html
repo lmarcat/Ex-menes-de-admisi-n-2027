@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Polimarc - Simulador 3D: Productos Notables y Factorización</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Paleta Colorida: Turquesa, Naranja, Azul y Blanco */
+            --turquesa-brillante: #00f2fe;
+            --turquesa-medio: #00c6ff;
+            --turquesa-oscuro: #007791;
+            --turquesa-fondo: #e0f7fa;
+            
+            --naranja-vibrante: #ff6b00;
+            --naranja-fuego: #ff8800;
+
+            --azul-electrico: #2563eb;
+            --azul-profundo: #1e1b4b;
+            --azul-marino: #0f172a;
+
+            --blanco-puro: #ffffff;
+            --bg-3d: #e0e6ed;
+
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            
+            /* Sombras 3D Biseled y Neumórficas */
+            --shadow-3d-out: 10px 10px 20px rgba(163,177,198,0.7), -10px -10px 20px rgba(255,255,255,1);
+            --shadow-3d-in: inset 6px 6px 12px rgba(163,177,198,0.8), inset -6px -6px 12px rgba(255,255,255,1);
+            
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            
+            --radius-sm: 12px;
+            --radius-md: 18px;
+            --radius-lg: 28px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #f1f5f9, #cbd5e1);
+            background-color: var(--bg-3d);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Colorido 3D */
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #005c8a 100%);
+            color: var(--blanco-puro);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35), inset 0 2px 2px rgba(255,255,255,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 3px solid var(--turquesa-brillante);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-logo {
+            background: linear-gradient(145deg, var(--turquesa-brillante), var(--naranja-vibrante));
+            color: var(--blanco-puro);
+            font-weight: 900;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 1.4rem;
+            letter-spacing: 1.5px;
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.4);
+            border: 2px solid var(--blanco-puro);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .topic-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--naranja-vibrante), var(--naranja-fuego));
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--blanco-puro);
+            margin-left: 10px;
+            box-shadow: 0 4px 10px rgba(255, 107, 0, 0.4);
+        }
+
+        .timer-badge {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            color: var(--turquesa-brillante);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.7), inset -2px -2px 5px rgba(255,255,255,0.1);
+            border: 2px solid var(--turquesa-brillante);
+            flex-shrink: 0;
+        }
+
+        .timer-badge.warning {
+            background: var(--naranja-vibrante);
+            color: var(--blanco-puro);
+            animation: pulse 1.2s infinite;
+        }
+
+        /* Barra de Progreso Multicolor */
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #cbd5e1;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 4%;
+            background: linear-gradient(90deg, var(--turquesa-brillante), var(--azul-electrico), var(--naranja-vibrante));
+            box-shadow: 0 2px 8px rgba(0, 242, 254, 0.6);
+            transition: width 0.4s ease;
+        }
+
+        /* Contenedor Grid Principal */
+        .container {
+            max-width: 1350px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2.5rem;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* Tarjeta Principal 3D */
+        .card {
+            background: var(--blanco-puro);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-3d-out);
+            padding: 2.8rem;
+            border: 3px solid var(--blanco-puro);
+            position: relative;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.8rem;
+            border-bottom: 3px dashed #cbd5e1;
+        }
+
+        .question-tag {
+            background: linear-gradient(135deg, var(--turquesa-brillante), var(--turquesa-medio));
+            color: var(--azul-marino);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 198, 255, 0.3);
+        }
+
+        .question-text {
+            font-size: 1.35rem;
+            font-weight: 800;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: var(--azul-profundo);
+        }
+
+        /* Opciones con Borde Colorido */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.3rem;
+        }
+
+        .option-item {
+            background: var(--blanco-puro);
+            border-radius: var(--radius-md);
+            padding: 1.2rem 1.6rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: var(--shadow-3d-out);
+            border: 2px solid transparent;
+        }
+
+        .option-item:hover:not(.disabled) {
+            transform: translateY(-3px);
+            border-color: var(--naranja-vibrante);
+            background: #fff8f5;
+            box-shadow: 12px 12px 24px rgba(163,177,198,0.8), -12px -12px 24px rgba(255,255,255,1);
+        }
+
+        .option-item.selected {
+            box-shadow: var(--shadow-3d-in);
+            background: var(--turquesa-fondo);
+            border-color: var(--turquesa-oscuro);
+            color: var(--azul-profundo);
+            font-weight: 700;
+        }
+
+        .option-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ffffff, #e2e8f0);
+            color: var(--azul-profundo);
+            font-weight: 900;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 4px 4px 8px rgba(163,177,198,0.6), -4px -4px 8px rgba(255,255,255,1);
+            transition: all 0.2s;
+            border: 1px solid var(--blanco-puro);
+        }
+
+        .option-item.selected .option-badge {
+            background: linear-gradient(135deg, var(--turquesa-brillante), var(--turquesa-oscuro));
+            color: var(--blanco-puro);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .option-item.correct {
+            background: #d1fae5;
+            box-shadow: var(--shadow-3d-in);
+            border-color: var(--success-color);
+            color: #065f46;
+        }
+
+        .option-item.correct .option-badge {
+            background: var(--success-color);
+            color: var(--blanco-puro);
+        }
+
+        .option-item.incorrect {
+            background: #fee2e2;
+            box-shadow: var(--shadow-3d-in);
+            border-color: var(--danger-color);
+            color: #991b1b;
+        }
+
+        .option-item.incorrect .option-badge {
+            background: var(--danger-color);
+            color: var(--blanco-puro);
+        }
+
+        .option-item.disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        /* Caja de Explicación Ampliada 3D */
+        .explanation-box {
+            margin-top: 2.2rem;
+            padding: 1.8rem;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
+            box-shadow: var(--shadow-3d-in);
+            border: 3px solid var(--turquesa-medio);
+            display: none;
+            animation: slideUp 0.35s ease;
+        }
+
+        .explanation-box.show {
+            display: block;
+        }
+
+        .explanation-title {
+            font-weight: 900;
+            color: var(--turquesa-oscuro);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.15rem;
+            border-bottom: 2px dashed var(--turquesa-medio);
+            padding-bottom: 0.5rem;
+        }
+
+        .explanation-body {
+            color: var(--azul-marino);
+            font-size: 1.02rem;
+            line-height: 1.75;
+            text-align: justify;
+        }
+
+        /* Botones Biseled 3D */
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2.5rem;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 1.1rem 2.2rem;
+            border-radius: var(--radius-md);
+            font-weight: 900;
+            font-size: 1.05rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .btn-check {
+            background: linear-gradient(145deg, var(--turquesa-brillante), var(--turquesa-oscuro));
+            color: var(--blanco-puro);
+            box-shadow: 0 7px 0 #005c8a, 0 12px 18px rgba(0,0,0,0.25);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .btn-check:hover:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 5px 0 #005c8a, 0 8px 14px rgba(0,0,0,0.2);
+        }
+
+        .btn-check:active:not(:disabled) {
+            transform: translateY(7px);
+            box-shadow: 0 0 0 #005c8a, inset 0 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .btn-next {
+            background: linear-gradient(145deg, var(--naranja-vibrante), var(--naranja-fuego));
+            color: var(--blanco-puro);
+            box-shadow: 0 7px 0 #cc5500, 0 12px 18px rgba(0,0,0,0.25);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 5px 0 #cc5500, 0 8px 14px rgba(0,0,0,0.2);
+        }
+
+        .btn-next:active:not(:disabled) {
+            transform: translateY(7px);
+            box-shadow: 0 0 0 #cc5500, inset 0 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .btn:disabled {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: var(--shadow-3d-in);
+            transform: none;
+            text-shadow: none;
+        }
+
+        /* Sidebar Navegación 3D */
+        .sidebar-card {
+            background: var(--blanco-puro);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-3d-out);
+            padding: 2rem;
+            position: sticky;
+            top: 100px;
+            border: 3px solid var(--blanco-puro);
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            color: var(--azul-profundo);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 800;
+            font-size: 0.95rem;
+            background: var(--bg-3d);
+            color: var(--text-muted);
+            cursor: pointer;
+            box-shadow: var(--shadow-3d-out);
+            transition: all 0.2s ease;
+        }
+
+        .grid-item:hover {
+            transform: scale(1.08);
+            color: var(--naranja-vibrante);
+        }
+
+        .grid-item.active {
+            box-shadow: var(--shadow-3d-in);
+            color: var(--blanco-puro);
+            background: linear-gradient(135deg, var(--turquesa-brillante), var(--turquesa-oscuro));
+        }
+
+        .grid-item.answered {
+            box-shadow: var(--shadow-3d-in);
+            color: var(--azul-profundo);
+            background: #cbd5e1;
+        }
+
+        .grid-item.correct-nav {
+            background: var(--success-color);
+            color: var(--blanco-puro);
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .grid-item.incorrect-nav {
+            background: var(--danger-color);
+            color: var(--blanco-puro);
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Modal Resultados 3D */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-content {
+            background: var(--blanco-puro);
+            border-radius: var(--radius-lg);
+            max-width: 580px;
+            width: 100%;
+            padding: 3.5rem 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-3d-out);
+            border: 4px solid var(--turquesa-brillante);
+            animation: zoomIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            margin: 2rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--blanco-puro);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35), inset 0 4px 8px rgba(255, 255, 255, 0.5);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .score-pass {
+            background: linear-gradient(145deg, var(--turquesa-brillante), var(--turquesa-oscuro));
+        }
+
+        .score-fail {
+            background: linear-gradient(145deg, var(--naranja-vibrante), var(--danger-color));
+        }
+
+        .encouragement-text {
+            font-size: 1.12rem;
+            margin: 1.8rem 0;
+            color: #334155;
+            line-height: 1.8;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.75; }
+        }
+
+        /* Responsive Design - Tablets y Celulares */
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+                margin: 1.5rem auto;
+                padding: 0 1rem;
+                gap: 1.8rem;
+            }
+
+            .sidebar-card {
+                position: static;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 0.8rem 1rem;
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .brand-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .brand-logo {
+                padding: 8px 16px;
+                font-size: 1.2rem;
+            }
+
+            .brand-title {
+                font-size: 1.1rem;
+            }
+
+            .topic-badge {
+                margin-left: 0;
+                margin-top: 4px;
+                display: inline-flex;
+            }
+
+            .timer-badge {
+                padding: 6px 16px;
+                font-size: 1rem;
+            }
+
+            .card {
+                padding: 1.2rem;
+                border-radius: var(--radius-md);
+            }
+
+            .question-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .option-item {
+                padding: 0.9rem 1rem;
+                gap: 12px;
+            }
+
+            .option-badge {
+                width: 32px;
+                height: 32px;
+                font-size: 0.95rem;
+            }
+
+            .btn-container {
+                flex-direction: column;
+                gap: 1rem;
+                margin-top: 1.5rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 0.9rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+                gap: 8px;
+            }
+
+            .grid-item {
+                font-size: 0.85rem;
+            }
+
+            .modal-content {
+                padding: 2rem 1.2rem;
+            }
+
+            .score-circle {
+                width: 120px;
+                height: 120px;
+                font-size: 2.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Personalizado -->
+    <header>
+        <div class="brand-container">
+            <div class="brand-logo">AP</div>
+            <div>
+                <div class="brand-title">
+                    Academia Polimarc 
+                    <span class="topic-badge"><i class="fa-solid fa-calculator"></i> Productos Notables y Factorización</span>
+                </div>
+                <small style="color: var(--turquesa-brillante); font-weight: 700;">Simulador Oficial para Examen de Admisión de Matemáticas</small>
+            </div>
+        </div>
+        <div class="timer-badge" id="timerBadge">
+            <i class="fa-regular fa-clock"></i>
+            <span id="timer">60:00</span>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Layout Container -->
+    <div class="container">
+        <!-- Main Quiz Card -->
+        <main>
+            <div class="card" id="quizCard">
+                <div class="question-header">
+                    <span class="question-tag" id="qNumber"><i class="fa-solid fa-square-root-variable"></i> Matemáticas - Pregunta 1 de 25</span>
+                    <small style="color: var(--text-muted); font-weight: 800;"><i class="fa-solid fa-star" style="color: var(--naranja-vibrante);"></i> Valor: 0.4 pts</small>
+                </div>
+                
+                <div class="question-text" id="qText">Cargando pregunta...</div>
+
+                <div class="options-list" id="optionsContainer">
+                    <!-- Dynamic Options -->
+                </div>
+
+                <div class="explanation-box" id="explanationBox">
+                    <div class="explanation-title" id="expTitle">
+                        <i class="fa-solid fa-graduation-cap"></i> Explicación Paso a Paso
+                    </div>
+                    <div class="explanation-body" id="expText"></div>
+                </div>
+
+                <div class="btn-container">
+                    <button class="btn btn-check" id="checkBtn" onclick="checkAnswer()">
+                        <i class="fa-solid fa-circle-check"></i> Comprobar
+                    </button>
+                    <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()" disabled>
+                        Siguiente <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar Grid -->
+        <aside>
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <i class="fa-solid fa-grip-vertical" style="color: var(--naranja-vibrante);"></i> Cuadrícula de Navegación
+                </div>
+                <div class="question-grid" id="navigationGrid">
+                    <!-- Dynamic Grid -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Result Modal -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <h2 id="resultTitle" style="font-size: 1.9rem; font-weight: 900; color: var(--azul-profundo);">Resultado: Productos Notables y Factorización</h2>
+            <div class="score-circle" id="scoreBadge">0.0</div>
+            <p style="font-size: 1.3rem; font-weight: 800; color: var(--azul-profundo);" id="scoreText">Nota Final: 0.0 / 10.0</p>
+            <p class="encouragement-text" id="encouragementText"></p>
+            <button class="btn btn-next" style="margin: 0 auto;" onclick="restartQuiz()">
+                <i class="fa-solid fa-rotate-right"></i> Repetir Simulador
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Banco de 25 preguntas adaptado
+        const questions = [
+            {
+                question: "Al desarrollar el binomio al cuadrado (3x + 5)², ¿cuál es el trinomio resultante?",
+                options: [
+                    "9x² + 25",
+                    "9x² + 15x + 25",
+                    "9x² + 30x + 25",
+                    "6x² + 30x + 10"
+                ],
+                correct: 2,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Aplicamos la regla del binomio al cuadrado: (a + b)² = a² + 2ab + b².<br>1) Primer término al cuadrado: (3x)² = 9x².<br>2) Doble del producto del primero por el segundo: 2 · (3x) · (5) = 30x.<br>3) Segundo término al cuadrado: 5² = 25.<br>Juntando los términos se obtiene: <b>9x² + 30x + 25</b>."
+            },
+            {
+                question: "Desarrolle la diferencia de un binomio al cuadrado: (2x - 7y)².",
+                options: [
+                    "4x² - 28xy + 49y²",
+                    "4x² - 14xy + 49y²",
+                    "4x² - 49y²",
+                    "4x² + 28xy - 49y²"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Usamos la regla: (a - b)² = a² - 2ab + b².<br>1) (2x)² = 4x².<br>2) -2(2x)(7y) = -28xy.<br>3) (7y)² = 49y².<br>Resultado final: <b>4x² - 28xy + 49y²</b>."
+            },
+            {
+                question: "Obtenga el desarrollo del binomio al cubo: (x + 2)³.",
+                options: [
+                    "x³ + 8",
+                    "x³ + 6x² + 12x + 8",
+                    "x³ + 3x² + 6x + 8",
+                    "x³ + 6x² + 6x + 8"
+                ],
+                correct: 1,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Aplicamos la regla: (a + b)³ = a³ + 3a²b + 3ab² + b³.<br>1) a³ = x³.<br>2) 3a²b = 3(x²)(2) = 6x².<br>3) 3ab² = 3(x)(2²) = 3(x)(4) = 12x.<br>4) b³ = 2³ = 8.<br>Resultado: <b>x³ + 6x² + 12x + 8</b>."
+            },
+            {
+                question: "Al desarrollar la diferencia de un binomio al cubo (2a - 3)³, se obtiene:",
+                options: [
+                    "8a³ - 27",
+                    "8a³ - 18a² + 36a - 27",
+                    "8a³ - 36a² + 54a - 27",
+                    "8a³ + 36a² - 54a + 27"
+                ],
+                correct: 2,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Aplicamos: (a - b)³ = a³ - 3a²b + 3ab² - b³.<br>1) (2a)³ = 8a³.<br>2) -3(2a)²(3) = -3(4a²)(3) = -36a².<br>3) +3(2a)(3²) = +3(2a)(9) = +54a.<br>4) -(3)³ = -27.<br>Resultado: <b>8a³ - 36a² + 54a - 27</b>."
+            },
+            {
+                question: "Efectúe el producto de binomios conjugados: (4x + 9)(4x - 9).",
+                options: [
+                    "16x² + 81",
+                    "16x² - 72x - 81",
+                    "16x² - 81",
+                    "8x² - 81"
+                ],
+                correct: 2,
+                explanation: "<b>Explicación Paso a Paso:</b><br>El producto de dos binomios conjugados genera una diferencia de cuadrados: (a + b)(a - b) = a² - b².<br>1) a² = (4x)² = 16x².<br>2) b² = (9)² = 81.<br>Restando ambos términos obtenemos: <b>16x² - 81</b>."
+            },
+            {
+                question: "Aplique la propiedad distributiva para resolver el producto de dos binomios: (x + 6)(x - 4).",
+                options: [
+                    "x² + 2x - 24",
+                    "x² - 24",
+                    "x² - 2x - 24",
+                    "x² + 10x - 24"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Aplicamos el producto de binomios con término común: (x + a)(x + b) = x² + (a + b)x + ab.<br>1) Término cuadrático: x².<br>2) Suma algebraica de los términos independientes: (6 - 4)x = +2x.<br>3) Producto de los términos independientes: (6)(-4) = -24.<br>Resultado: <b>x² + 2x - 24</b>."
+            },
+            {
+                question: "Desarrolle el producto empleando la propiedad distributiva: (3x - 2)(2x + 5).",
+                options: [
+                    "6x² + 11x - 10",
+                    "6x² - 10",
+                    "6x² + 19x - 10",
+                    "6x² - 11x - 10"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Multiplicamos cada término del primer binomio por el segundo:<br>1) (3x)(2x) = 6x².<br>2) (3x)(5) = 15x.<br>3) (-2)(2x) = -4x.<br>4) (-2)(5) = -10.<br>Reduciendo términos semejantes (15x - 4x = 11x): <b>6x² + 11x - 10</b>."
+            },
+            {
+                question: "Factorice la siguiente diferencia de cuadrados perfectos: 25m² - 64n².",
+                options: [
+                    "(5m - 8n)²",
+                    "(5m + 8n)(5m - 8n)",
+                    "(25m + 64n)(m - n)",
+                    "(5m + 8n)²"
+                ],
+                correct: 1,
+                explanation: "<b>Explicación Paso a Paso:</b><br>La diferencia de cuadrados a² - b² se factoriza como (a + b)(a - b).<br>1) Extraemos la raíz cuadrada del primer término: √(25m²) = 5m.<br>2) Extraemos la raíz cuadrada del segundo término: √(64n²) = 8n.<br>Formamos la suma por la diferencia de sus raíces: <b>(5m + 8n)(5m - 8n)</b>."
+            },
+            {
+                question: "Al factorizar completamente la diferencia de cuadrados 81x⁴ - 16, se obtiene:",
+                options: [
+                    "(9x² - 4)²",
+                    "(9x² + 4)(9x² - 4)",
+                    "(9x² + 4)(3x + 2)(3x - 2)",
+                    "(3x + 2)⁴"
+                ],
+                correct: 2,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) Primera factorización como diferencia de cuadrados: (9x² + 4)(9x² - 4).<br>2) El segundo factor (9x² - 4) vuelve a ser una diferencia de cuadrados: √(9x²) = 3x y √(4) = 2, quedando (3x + 2)(3x - 2).<br>Factorización completa: <b>(9x² + 4)(3x + 2)(3x - 2)</b>."
+            },
+            {
+                question: "Factorice la suma de cubos perfectos: x³ + 125.",
+                options: [
+                    "(x + 5)(x² - 5x + 25)",
+                    "(x + 5)(x² + 5x + 25)",
+                    "(x - 5)(x² + 5x + 25)",
+                    "(x + 5)³"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Fórmula de suma de cubos: a³ + b³ = (a + b)(a² - ab + b²).<br>1) Raíces cúbicas: ∛(x³) = x, ∛(125) = 5.<br>2) Binomio de suma: (x + 5).<br>3) Trinomio: (x)² - (x)(5) + (5)² = (x² - 5x + 25).<br>Resultado: <b>(x + 5)(x² - 5x + 25)</b>."
+            },
+            {
+                question: "Factorice la diferencia de cubos perfectos: 27a³ - 8b³.",
+                options: [
+                    "(3a - 2b)(9a² - 6ab + 4b²)",
+                    "(3a - 2b)(9a² + 6ab + 4b²)",
+                    "(3a + 2b)(9a² - 6ab + 4b²)",
+                    "(3a - 2b)³"
+                ],
+                correct: 1,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Fórmula de diferencia de cubos: a³ - b³ = (a - b)(a² + ab + b²).<br>1) Raíces cúbicas: ∛(27a³) = 3a, ∛(8b³) = 2b.<br>2) Binomio base: (3a - 2b).<br>3) Trinomio: (3a)² + (3a)(2b) + (2b)² = (9a² + 6ab + 4b²).<br>Resultado: <b>(3a - 2b)(9a² + 6ab + 4b²)</b>."
+            },
+            {
+                question: "Factorice mediante el método del factor común la expresión: 12x³y² - 18x²y³ + 24x²y.",
+                options: [
+                    "6x²y(2xy - 3y² + 4)",
+                    "6xy(2x²y - 3xy² + 4x)",
+                    "12x²y(xy - 2y² + 2)",
+                    "6x³y³(2x - 3y + 4)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) Máximo común divisor de los coeficientes (12, 18, 24) = 6.<br>2) Variables comunes con su menor exponente: x², y.<br>3) Factor común monomio = 6x²y.<br>4) Dividimos cada término entre el factor común:<br>- 12x³y² / 6x²y = 2xy<br>- -18x²y³ / 6x²y = -3y²<br>- 24x²y / 6x²y = 4<br>Resultado: <b>6x²y(2xy - 3y² + 4)</b>."
+            },
+            {
+                question: "Extraiga el factor común de la expresión con paréntesis: 5a(x - y) + 2b(x - y).",
+                options: [
+                    "(x - y)(5a - 2b)",
+                    "(x - y)(5a + 2b)",
+                    "10ab(x - y)",
+                    "(x + y)(5a + 2b)"
+                ],
+                correct: 1,
+                explanation: "<b>Explicación Paso a Paso:</b><br>El factor común polinomio es el paréntesis repetido: (x - y).<br>Dividimos cada término entre (x - y) y agrupamos los coeficientes restantes:<br>Resultado: <b>(x - y)(5a + 2b)</b>."
+            },
+            {
+                question: "Factorice por agrupación de términos: ax + bx + ay + by.",
+                options: [
+                    "(a + b)(x + y)",
+                    "(a - b)(x - y)",
+                    "(ax + by)(a + b)",
+                    "ab(x + y)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) Agrupamos de dos en dos: (ax + bx) + (ay + by).<br>2) Factorizamos el factor común de cada grupo:<br>x(a + b) + y(a + b).<br>3) Extraemos el factor común polinomio (a + b):<br><b>(a + b)(x + y)</b>."
+            },
+            {
+                question: "Factorice por agrupación de términos la expresión: 3m² - 6mn + 4m - 8n.",
+                options: [
+                    "(3m + 4)(m - 2n)",
+                    "(3m - 4)(m + 2n)",
+                    "(m - 2n)(3m - 4)",
+                    "(3m - 2n)(m + 4)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) Agrupamos los términos: (3m² - 6mn) + (4m - 8n).<br>2) Factor común en el primer grupo: 3m(m - 2n).<br>3) Factor común en el segundo grupo: 4(m - 2n).<br>4) Extraemos el factor común (m - 2n): <b>(3m + 4)(m - 2n)</b>."
+            },
+            {
+                question: "Verifique y factorice el trinomio cuadrado perfecto: 16x² + 40x + 25.",
+                options: [
+                    "(4x + 5)²",
+                    "(4x - 5)²",
+                    "(16x + 25)²",
+                    "(8x + 5)²"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) Raíz del primer término: √(16x²) = 4x.<br>2) Raíz del tercer término: √(25) = 5.<br>3) Verificamos el término del medio: 2 · (4x) · (5) = 40x (coincide).<br>Al ser todos positivos, se escribe como el cuadrado de una suma: <b>(4x + 5)²</b>."
+            },
+            {
+                question: "Factorice el trinomio cuadrado perfecto: 9a² - 42ab + 49b².",
+                options: [
+                    "(3a + 7b)²",
+                    "(3a - 7b)²",
+                    "(9a - 49b)²",
+                    "(3a - 7b)(3a + 7b)"
+                ],
+                correct: 1,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) √(9a²) = 3a.<br>2) √(49b²) = 7b.<br>3) Comprobación del término central: 2 · (3a) · (7b) = 42ab.<br>Dado que el término central es negativo (-42ab), el binomio es una diferencia: <b>(3a - 7b)²</b>."
+            },
+            {
+                question: "Factorice el trinomio de la forma x² + bx + c: x² + 7x + 12.",
+                options: [
+                    "(x + 6)(x + 2)",
+                    "(x + 12)(x + 1)",
+                    "(x + 4)(x + 3)",
+                    "(x - 4)(x - 3)"
+                ],
+                correct: 2,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Buscamos dos números que multiplicados den +12 y sumados den +7.<br>Los números son +4 y +3, pues (+4)(+3) = +12 y (+4) + (+3) = +7.<br>Factorización: <b>(x + 4)(x + 3)</b>."
+            },
+            {
+                question: "Factorice el trinomio de la forma x² + bx + c: x² - 5x - 24.",
+                options: [
+                    "(x - 8)(x + 3)",
+                    "(x + 8)(x - 3)",
+                    "(x - 12)(x + 2)",
+                    "(x - 6)(x + 4)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Buscamos dos números que multiplicados den -24 y cuya suma algebraica sea -5.<br>Los números son -8 y +3, ya que (-8)(+3) = -24 y -8 + 3 = -5.<br>Factorización: <b>(x - 8)(x + 3)</b>."
+            },
+            {
+                question: "Factorice el trinomio: x² - 11x + 28.",
+                options: [
+                    "(x - 14)(x - 2)",
+                    "(x - 7)(x - 4)",
+                    "(x + 7)(x + 4)",
+                    "(x - 7)(x + 4)"
+                ],
+                correct: 1,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Buscamos dos números que multiplicados den +28 y sumados den -11.<br>Ambos números deben ser negativos: -7 y -4.<br>(-7)(-4) = +28 y -7 + (-4) = -11.<br>Factorización: <b>(x - 7)(x - 4)</b>."
+            },
+            {
+                question: "Factorice el trinomio de la forma ax² + bx + c: 2x² + 7x + 3.",
+                options: [
+                    "(2x + 1)(x + 3)",
+                    "(2x + 3)(x + 1)",
+                    "(2x + 6)(x + 1)",
+                    "(x + 2)(2x + 3)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Método del aspa simple o descomposición:<br>Descomponemos 2x² = (2x)(x) y 3 = (1)(3).<br>Multiplicación cruzada: (2x)(3) = 6x y (x)(1) = 1x.<br>Suma cruzada: 6x + 1x = 7x (coincide con el término central).<br>Factores horizontales: <b>(2x + 1)(x + 3)</b>."
+            },
+            {
+                question: "Factorice el trinomio de la forma ax² + bx + c: 6x² - 7x - 3.",
+                options: [
+                    "(3x + 1)(2x - 3)",
+                    "(3x - 1)(2x + 3)",
+                    "(6x + 1)(x - 3)",
+                    "(2x + 1)(3x - 3)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Descomponemos 6x² en (3x)(2x) y -3 en (+1)(-3).<br>Prueba del aspa cruzada:<br>(3x)(-3) = -9x<br>(2x)(+1) = +2x<br>Suma: -9x + 2x = -7x (término central exacto).<br>Agrupando de forma horizontal: <b>(3x + 1)(2x - 3)</b>."
+            },
+            {
+                question: "Factorice completamente el trinomio: 5x² - 13x - 6.",
+                options: [
+                    "(5x + 2)(x - 3)",
+                    "(5x - 2)(x + 3)",
+                    "(5x + 3)(x - 2)",
+                    "(5x - 6)(x + 1)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>Descomponemos 5x² en (5x)(x) y -6 en (+2)(-3).<br>Comprobación cruzada:<br>(5x)(-3) = -15x<br>(x)(+2) = +2x<br>Suma: -15x + 2x = -13x.<br>Por lo tanto, la factorización correcta es: <b>(5x + 2)(x - 3)</b>."
+            },
+            {
+                question: "Combine factor común y diferencia de cuadrados para factorizando totalmente: 3x³ - 12x.",
+                options: [
+                    "3x(x - 2)²",
+                    "3x(x + 2)(x - 2)",
+                    "3(x² - 4)",
+                    "x(3x + 6)(x - 2)"
+                ],
+                correct: 1,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) Extraemos factor común monomio 3x: 3x(x² - 4).<br>2) El paréntesis (x² - 4) es una diferencia de cuadrados: (x + 2)(x - 2).<br>Factorización completa: <b>3x(x + 2)(x - 2)</b>."
+            },
+            {
+                question: "Factorice completamente combinando métodos: 2x³ + 16.",
+                options: [
+                    "2(x + 2)(x² - 2x + 4)",
+                    "2(x + 2)³",
+                    "(2x + 4)(x² - 2x + 4)",
+                    "2(x - 2)(x² + 2x + 4)"
+                ],
+                correct: 0,
+                explanation: "<b>Explicación Paso a Paso:</b><br>1) Extraemos factor común 2: 2(x³ + 8).<br>2) Factorizamos el paréntesis (x³ + 8) como suma de cubos perfectos: ∛(x³) = x, ∛(8) = 2.<br>(x³ + 8) = (x + 2)(x² - 2x + 4).<br>Resultado completo: <b>2(x + 2)(x² - 2x + 4)</b>."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let selectedAnswers = new Array(questions.length).fill(null);
+        let checkedQuestions = new Array(questions.length).fill(false);
+        let timerSeconds = 3600; 
+        let timerInterval;
+
+        window.onload = function() {
+            renderGrid();
+            loadQuestion(0);
+            startTimer();
+        };
+
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer');
+            const timerBadge = document.getElementById('timerBadge');
+
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                let mins = Math.floor(timerSeconds / 60);
+                let secs = timerSeconds % 60;
+
+                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (timerSeconds <= 600) { 
+                    timerBadge.classList.add('warning');
+                }
+
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('navigationGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'grid-item';
+                btn.id = `nav-${i}`;
+                btn.textContent = i + 1;
+                btn.onclick = () => jumpToQuestion(i);
+                grid.appendChild(btn);
+            }
+        }
+
+        function updateGridStatus(index) {
+            const item = document.getElementById(`nav-${index}`);
+            item.className = 'grid-item';
+            
+            if (index === currentQuestion) {
+                item.classList.add('active');
+            }
+
+            if (checkedQuestions[index]) {
+                if (selectedAnswers[index] === questions[index].correct) {
+                    item.classList.add('correct-nav');
+                    item.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                } else {
+                    item.classList.add('incorrect-nav');
+                    item.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                }
+            } else if (selectedAnswers[index] !== null) {
+                item.classList.add('answered');
+                item.textContent = index + 1;
+            } else {
+                item.textContent = index + 1;
+            }
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[index];
+
+            const progressPercent = ((index + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            document.getElementById('qNumber').innerHTML = `<i class="fa-solid fa-calculator"></i> Productos Notables - Pregunta ${index + 1} de ${questions.length}`;
+            document.getElementById('qText').textContent = q.question;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const badges = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((opt, idx) => {
+                const optDiv = document.createElement('div');
+                optDiv.className = 'option-item';
+                
+                if (checkedQuestions[index]) {
+                    optDiv.classList.add('disabled');
+                    if (idx === q.correct) optDiv.classList.add('correct');
+                    if (selectedAnswers[index] === idx && idx !== q.correct) optDiv.classList.add('incorrect');
+                } else if (selectedAnswers[index] === idx) {
+                    optDiv.classList.add('selected');
+                }
+
+                optDiv.onclick = () => selectOption(idx);
+
+                optDiv.innerHTML = `
+                    <div class="option-badge">${badges[idx]}</div>
+                    <div style="font-weight: 700; font-size: 1.05rem;">${opt}</div>
+                `;
+                optionsContainer.appendChild(optDiv);
+            });
+
+            const expBox = document.getElementById('explanationBox');
+            const checkBtn = document.getElementById('checkBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (checkedQuestions[index]) {
+                expBox.classList.add('show');
+                document.getElementById('expText').innerHTML = q.explanation;
+                checkBtn.disabled = true;
+                nextBtn.disabled = false;
+            } else {
+                expBox.classList.remove('show');
+                checkBtn.disabled = selectedAnswers[index] === null;
+                nextBtn.disabled = true;
+            }
+
+            for (let i = 0; i < questions.length; i++) {
+                updateGridStatus(i);
+            }
+        }
+
+        function selectOption(optIndex) {
+            if (checkedQuestions[currentQuestion]) return;
+
+            selectedAnswers[currentQuestion] = optIndex;
+            document.getElementById('checkBtn').disabled = false;
+
+            const options = document.querySelectorAll('.option-item');
+            options.forEach((opt, idx) => {
+                if (idx === optIndex) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+
+            updateGridStatus(currentQuestion);
+        }
+
+        function checkAnswer() {
+            if (selectedAnswers[currentQuestion] === null) return;
+
+            checkedQuestions[currentQuestion] = true;
+            loadQuestion(currentQuestion);
+
+            if (currentQuestion === questions.length - 1) {
+                document.getElementById('nextBtn').innerHTML = `Finalizar Examen <i class="fa-solid fa-flag-checkered"></i>`;
+            }
+        }
+
+        function jumpToQuestion(index) {
+            if (index > currentQuestion && !checkedQuestions[currentQuestion]) {
+                alert("Por favor comprueba tu respuesta antes de avanzar a la siguiente pregunta.");
+                return;
+            }
+            loadQuestion(index);
+        }
+
+        function nextQuestion() {
+            if (!checkedQuestions[currentQuestion]) {
+                alert("Debes comprobar la respuesta actual para poder continuar.");
+                return;
+            }
+
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+
+            let correctCount = 0;
+            selectedAnswers.forEach((ans, idx) => {
+                if (ans === questions[idx].correct) {
+                    correctCount++;
+                }
+            });
+
+            let score = (correctCount / questions.length) * 10;
+            let scoreFormatted = score.toFixed(1);
+
+            const modal = document.getElementById('resultModal');
+            const scoreBadge = document.getElementById('scoreBadge');
+            const scoreText = document.getElementById('scoreText');
+            const encouragementText = document.getElementById('encouragementText');
+
+            scoreBadge.textContent = `${scoreFormatted}`;
+            scoreText.textContent = `Puntaje obtenido: ${scoreFormatted} / 10.0 (${correctCount} de 25 aciertos)`;
+
+            if (score >= 7.0) {
+                scoreBadge.className = 'score-circle score-pass';
+                document.getElementById('resultTitle').textContent = "¡Aprobado! Excelente Dominio de Factorización";
+                encouragementText.innerHTML = `📐 <strong>¡Dominio algebraico sobresaliente!</strong> Has demostrado destreza en los métodos de productos notables y casos de factorización.<br>Tu constante práctica en la <strong>Academia Polimarc</strong> asegura el mejor rendimiento en tus exámenes de admisión. ¡Felicidades!`;
+            } else {
+                scoreBadge.className = 'score-circle score-fail';
+                document.getElementById('resultTitle').textContent = "¡Sigue Practicando! Debes Repetir";
+                encouragementText.innerHTML = `💪 <strong>¡Ánimo y constancia!</strong> El álgebra requiere precisión con los signos y las reglas de cada caso.<br>Estudia las soluciones explicadas paso a paso, vuelve a intentar el simulador en la <strong>Academia Polimarc</strong> y verás cómo superas la nota mínima de 7.0. ¡A por ello!`;
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            selectedAnswers = new Array(questions.length).fill(null);
+            checkedQuestions = new Array(questions.length).fill(false);
+            timerSeconds = 3600;
+
+            document.getElementById('resultModal').style.display = 'none';
+            document.getElementById('nextBtn').innerHTML = `Siguiente <i class="fa-solid fa-arrow-right"></i>`;
+
+            renderGrid();
+            loadQuestion(0);
+            startTimer();
+        }
+    </script>
+</body>
+</html>
